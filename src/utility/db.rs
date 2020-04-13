@@ -6,8 +6,6 @@ pub mod mysql {
 
     static MYSQL_POOL: OnceCell<MySqlPool> = OnceCell::new();
 
-    type MySqlTransaction = Transaction<PoolConnection<MySqlConnection>>;
-
     pub async fn create_pool() -> MySqlPool {
         MySqlPool::builder()
             .min_size(crate::conf::global().mysql.min)
@@ -23,10 +21,12 @@ pub mod mysql {
         assert!(MYSQL_POOL.set(pool).is_ok());
     }
 
+    #[allow(dead_code)]
     pub fn get_pool() -> Option<&'static MySqlPool> {
         MYSQL_POOL.get()
     }
 
+    #[allow(dead_code)]
     pub async fn get_connection() -> Option<PoolConnection<MySqlConnection>> {
         let pool = MYSQL_POOL.get();
 
@@ -37,7 +37,8 @@ pub mod mysql {
         pool.unwrap().acquire().await.ok()
     }
 
-    pub async fn get_transaction() -> Option<MySqlTransaction> {
+    #[allow(dead_code)]
+    pub async fn get_transaction() -> Option<Transaction<PoolConnection<MySqlConnection>>> {
         let pool = MYSQL_POOL.get();
 
         if pool.is_none() {
@@ -54,12 +55,9 @@ pub mod redis {
     use mobc_redis::{redis, RedisConnectionManager};
     use once_cell::sync::OnceCell;
 
-    static REDIS_POOL: OnceCell<RedisPool> = OnceCell::new();
+    static REDIS_POOL: OnceCell<mobc::Pool<RedisConnectionManager>> = OnceCell::new();
 
-    type RedisPool = mobc::Pool<RedisConnectionManager>;
-    type RedisConn = mobc::Connection<RedisConnectionManager>;
-
-    pub fn create_pool() -> RedisPool {
+    pub fn create_pool() -> mobc::Pool<RedisConnectionManager> {
         let manager = RedisConnectionManager::new({
             let addr = crate::conf::global().redis_addr();
             redis::Client::open(addr.as_str()).expect("redis server disconnect")
@@ -71,15 +69,17 @@ pub mod redis {
             .build(manager)
     }
 
-    pub fn init_pool(pool: RedisPool) {
+    pub fn init_pool(pool: mobc::Pool<RedisConnectionManager>) {
         assert!(REDIS_POOL.set(pool).is_ok());
     }
 
-    pub fn get_pool() -> Option<&'static RedisPool> {
+    #[allow(dead_code)]
+    pub fn get_pool() -> Option<&'static mobc::Pool<RedisConnectionManager>> {
         REDIS_POOL.get()
     }
 
-    pub async fn get_connection() -> Option<RedisConn> {
+    #[allow(dead_code)]
+    pub async fn get_connection() -> Option<mobc::Connection<RedisConnectionManager>> {
         let pool = REDIS_POOL.get();
 
         if pool.is_none() {

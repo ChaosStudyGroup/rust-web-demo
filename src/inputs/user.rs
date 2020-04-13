@@ -1,6 +1,5 @@
 use serde::{Deserialize};
-use validator::{Validate, ValidationError, ValidationErrors};
-use std::collections::HashMap;
+use validator::Validate;
 use crate::utility::err::*;
 
 #[derive(Debug, Validate, Deserialize)]

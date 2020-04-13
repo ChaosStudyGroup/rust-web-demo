@@ -28,7 +28,7 @@ pub fn init_log() {
     // 记录警告级别以上的日志
     let stdout_appender = Appender::builder()
         .filter(Box::new(ThresholdFilter::new(log::LevelFilter::Warn)))
-        .build("stderr", Box::new(stdout));
+        .build("stdout", Box::new(stdout));
 
     let logfile_appender = Appender::builder().build("logfile", Box::new(logfile));
 

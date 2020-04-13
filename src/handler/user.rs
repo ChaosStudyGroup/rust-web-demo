@@ -1,4 +1,4 @@
-use actix_web::{HttpRequest, Responder, web, HttpResponse};
+use actix_web::{Responder, web, HttpResponse};
 use crate::inputs::user::LoginInput;
 
 pub async fn login(input: web::Json<LoginInput>) -> impl Responder {

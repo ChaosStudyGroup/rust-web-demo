@@ -12,6 +12,7 @@ mod inputs;
 mod handler;
 mod utility;
 
+
 #[actix_rt::main]
 async fn main() -> Result<(), Box<dyn Error>> {
     // 初始化mysql连接池

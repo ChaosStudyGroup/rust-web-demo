@@ -1,6 +1,6 @@
 use std::fmt::{Display, Formatter};
 use actix_web::HttpResponse;
-use serde::{Serialize, Serializer};
+use serde::Serialize;
 use std::error::Error;
 
 #[derive(Debug, Serialize)]
@@ -34,10 +34,12 @@ enum ErrorKind {
 }
 
 impl RespError {
+    #[allow(dead_code)]
     pub fn json(self) -> HttpResponse {
         HttpResponse::Ok().json(self)
     }
 
+    #[allow(dead_code)]
     pub fn data<T: Serialize>(self, data: T) -> RespData<T> {
         RespData{
             code: self.code,
@@ -49,6 +51,7 @@ impl RespError {
 }
 
 impl<T: Serialize> RespData<T> {
+    #[allow(dead_code)]
     pub fn json(self) -> HttpResponse {
         HttpResponse::Ok().json(self)
     }
@@ -64,6 +67,7 @@ impl Display for RespError {
 
 macro_rules! impl_code_msg {
     ($name: ident, $code: expr, $msg: expr) => {
+        #[allow(dead_code)]
         pub fn $name(tip: impl AsRef<str>, err: Option<&dyn Error>) -> RespError {
             if let Some(e) = err {
                 log::error!("{}", e);
@@ -74,3 +78,9 @@ macro_rules! impl_code_msg {
 }
 
 impl_code_msg!(system, ErrorKind::System, "System error, please try later again.");
+impl_code_msg!(params_invalid, ErrorKind::ParamsInvalid, "Params invalid, please check inputs.");
+impl_code_msg!(no_permission, ErrorKind::NoPermission, "No permission, do you login success?");
+impl_code_msg!(illegal_operation, ErrorKind::IllegalOperation, "Illegal operation.");
+impl_code_msg!(user_not_found, ErrorKind::UserNotFound, "User not found.");
+impl_code_msg!(user_exists, ErrorKind::UserExists, "User already exists.");
+impl_code_msg!(password_invalid, ErrorKind::PasswordInvalid, "Account or password invalid, please check it.");
