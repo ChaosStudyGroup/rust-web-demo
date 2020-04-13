@@ -1,12 +1,10 @@
 #[macro_use]
 extern crate validator_derive;
-extern crate log;
-extern crate log4rs;
 
 use std::error::Error;
 use actix_web::{App, HttpServer, web};
 
-use crate::utility::db;
+use crate::utility::{db, log};
 use crate::handler::{user, asset};
 
 mod conf;
@@ -23,7 +21,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
     db::redis::init_pool(db::redis::create_pool());
 
     // 初始化日志文件
-    log4rs::init_file("log4rs.yaml",Default::default()).unwrap();
+    log::init_log();
 
     // 创建app
     let app_factory = || {

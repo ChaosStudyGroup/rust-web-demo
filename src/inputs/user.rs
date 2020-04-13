@@ -14,6 +14,9 @@ pub struct LoginInput {
 impl LoginInput {
     pub fn validate_error(&self) -> Result<(), RespError> {
         if let Err(errs) = self.validate() {
+            log::info!("info");
+            log::warn!("warn");
+            log::error!("error");
             return Err(system("some error happen", Some(&errs)));
         }
 
