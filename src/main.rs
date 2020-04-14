@@ -8,7 +8,6 @@ use crate::utility::{db, log};
 use crate::handler::{user, asset};
 
 mod conf;
-mod inputs;
 mod handler;
 mod utility;
 
