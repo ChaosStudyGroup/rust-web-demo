@@ -1,18 +1,8 @@
-use std::fmt::{Display, Formatter};
-use actix_web::HttpResponse;
 use serde::Serialize;
-use std::error::Error;
+use actix_web::HttpResponse;
 
 #[derive(Debug, Serialize)]
-pub struct RespError {
-    code: u32,
-    msg: String,
-    #[serde(skip_serializing_if = "String::is_empty")]
-    tip: String,
-}
-
-#[derive(Debug, Serialize)]
-pub struct RespData<T> {
+pub struct RespBody<T> {
     code: u32,
     msg: String,
     #[serde(skip_serializing_if = "String::is_empty")]
@@ -20,7 +10,31 @@ pub struct RespData<T> {
     data: T,
 }
 
+impl<T: Serialize> RespBody<T> {
+    pub fn json(self) -> HttpResponse {
+        HttpResponse::Ok().json(self)
+    }
+}
+
 #[derive(Debug, Serialize)]
+pub struct Success {}
+
+impl Success {
+    pub fn json() -> HttpResponse {
+        Self::data(Success {}).json()
+    }
+
+    pub fn data<T: Serialize>(data: T) -> RespBody<T> {
+        RespBody {
+            code: 1000,
+            msg: "success".into(),
+            tip: "".into(),
+            data,
+        }
+    }
+}
+
+#[derive(Debug)]
 enum ErrorKind {
     System = 1001,
 
@@ -33,48 +47,42 @@ enum ErrorKind {
     PasswordInvalid = 3003,
 }
 
-impl RespError {
-    #[allow(dead_code)]
+#[derive(Debug)]
+pub struct Error(ErrorKind, String, String);
+
+impl Error {
     pub fn json(self) -> HttpResponse {
-        HttpResponse::Ok().json(self)
+        self.data("").json()
     }
 
-    #[allow(dead_code)]
-    pub fn data<T: Serialize>(self, data: T) -> RespData<T> {
-        RespData{
-            code: self.code,
-            msg: self.msg,
-            tip: self.tip,
+    pub fn data<T: Serialize>(self, data: T) -> RespBody<T> {
+        RespBody {
+            code: self.0 as u32,
+            msg: self.1,
+            tip: self.2,
             data,
         }
     }
 }
 
-impl<T: Serialize> RespData<T> {
-    #[allow(dead_code)]
-    pub fn json(self) -> HttpResponse {
-        HttpResponse::Ok().json(self)
-    }
-}
+impl std::error::Error for Error {}
 
-impl Error for RespError {}
-
-impl Display for RespError {
-    fn fmt(&self, f: &mut Formatter<'_>) -> Result<(), std::fmt::Error> {
-        write!(f, "Response Error: {:?}", self)
+impl std::fmt::Display for Error {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> Result<(), std::fmt::Error> {
+        write!(f, "code: {:?}, msg: {}, tips: {}", self.0, self.1, self.2)
     }
 }
 
 macro_rules! impl_code_msg {
     ($name: ident, $code: expr, $msg: expr) => {
         #[allow(dead_code)]
-        pub fn $name(tip: impl AsRef<str>, err: Option<&dyn Error>) -> RespError {
+        pub fn $name(tip: impl AsRef<str>, err: Option<&dyn std::error::Error>) -> Error {
             if let Some(e) = err {
                 log::error!("{}", e);
             }
-            RespError{code: $code as u32, msg: $msg.into(), tip: tip.as_ref().into()}
+            Error($code, $msg.into(), tip.as_ref().into())
         }
-    }
+    };
 }
 
 impl_code_msg!(system, ErrorKind::System, "System error, please try later again.");
