@@ -20,7 +20,7 @@ impl<T: Serialize> RespBody<T> {
 struct EmptyData {}
 
 #[derive(Debug, Serialize)]
-pub struct Success {}
+pub struct Success;
 
 impl Success {
     pub fn json() -> HttpResponse {
