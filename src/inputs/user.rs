@@ -1,6 +1,6 @@
 use serde::{Deserialize};
 use validator::Validate;
-use crate::utility::err::*;
+use crate::utility::result::*;
 
 #[derive(Debug, Validate, Deserialize)]
 pub struct LoginInput {
@@ -11,7 +11,7 @@ pub struct LoginInput {
 }
 
 impl LoginInput {
-    pub fn validate_error(&self) -> Result<(), RespError> {
+    pub fn validate_error(&self) -> Result<(), Error> {
         if let Err(errs) = self.validate() {
             log::info!("info");
             log::warn!("warn");

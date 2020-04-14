@@ -1,5 +1,5 @@
-use serde::Serialize;
 use actix_web::HttpResponse;
+use serde::Serialize;
 
 #[derive(Debug, Serialize)]
 pub struct RespBody<T> {
@@ -17,11 +17,14 @@ impl<T: Serialize> RespBody<T> {
 }
 
 #[derive(Debug, Serialize)]
+struct EmptyData {}
+
+#[derive(Debug, Serialize)]
 pub struct Success {}
 
 impl Success {
     pub fn json() -> HttpResponse {
-        Self::data(Success {}).json()
+        Self::data(EmptyData {}).json()
     }
 
     pub fn data<T: Serialize>(data: T) -> RespBody<T> {
@@ -52,7 +55,7 @@ pub struct Error(ErrorKind, String, String);
 
 impl Error {
     pub fn json(self) -> HttpResponse {
-        self.data("").json()
+        self.data(EmptyData {}).json()
     }
 
     pub fn data<T: Serialize>(self, data: T) -> RespBody<T> {
