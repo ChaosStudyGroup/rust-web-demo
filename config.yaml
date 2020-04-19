@@ -2,7 +2,7 @@ server:
   port: 8080
   log: data/logs/app/web.log
 mysql:
-  dsn: mysql://root:root@127.0.0.1:3306/springboot-admin
+  dsn: mysql://root:root@127.0.0.1:3306/demo
   min: 2
   max: 20
 redis:

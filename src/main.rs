@@ -2,15 +2,13 @@
 extern crate validator_derive;
 
 use std::error::Error;
-use actix_web::{App, HttpServer, web};
+use actix_web::{App, HttpServer};
 
 use crate::utility::{db, log};
-use crate::handler::{user, asset};
 
 mod conf;
 mod handler;
 mod utility;
-
 
 #[actix_rt::main]
 async fn main() -> Result<(), Box<dyn Error>> {
@@ -25,11 +23,13 @@ async fn main() -> Result<(), Box<dyn Error>> {
 
     // 创建app
     let app_factory = || {
-        App::new().service(web::scope("/api")
-            .route("/user/login", web::post().to(user::login))
-        ).service(web::scope("/static")
-            .route("/index.html", web::get().to(asset::index))
-        )
+        App::new()
+            // 自定义预处理中间件
+            .wrap(handler::AccessLog)
+            // api相关的路由
+            .service(handler::api_routes())
+            // 静态资源相关的路由
+            .service(handler::static_routes())
     };
 
     // 运行服务，绑定监听端口
