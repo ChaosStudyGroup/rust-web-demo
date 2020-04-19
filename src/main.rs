@@ -4,11 +4,13 @@ extern crate validator_derive;
 use std::error::Error;
 use actix_web::{App, HttpServer};
 
-use crate::utility::{db, log};
-
 mod conf;
+mod dao;
+mod model;
 mod handler;
 mod utility;
+
+use crate::utility::{db, log};
 
 #[actix_rt::main]
 async fn main() -> Result<(), Box<dyn Error>> {

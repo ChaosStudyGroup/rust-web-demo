@@ -8,8 +8,9 @@ edition = "2018"
 
 [dependencies]
 tokio = {version = "0.2", features = ["full"]}
-sqlx = {version = "0.3.4", default-features = false, features = ["runtime-tokio", "mysql"]}
+sqlx = {version = "0.3.4", default-features = false, features = ["runtime-tokio", "mysql", "chrono"]}
 serde = { version = "1.0.105", features=["derive"] }
+chrono = {verison = "0.4.11", features=["serde"]}
 validator = "0.10.0"
 validator_derive = "0.10.0"
 serde_json = "1.0.50"
@@ -24,4 +25,3 @@ mobc = "0.5"
 log = "0.4.8"
 log4rs = "0.11.0"
 futures = "0.3.4"
-bytes = "0.5.4"

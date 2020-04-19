@@ -1,6 +1,7 @@
 server:
   port: 8080
   log: data/logs/app/web.log
+  env: dev
 mysql:
   dsn: mysql://root:root@127.0.0.1:3306/demo
   min: 2

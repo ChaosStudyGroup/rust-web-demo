@@ -2,6 +2,8 @@ use std::sync::Arc;
 use once_cell::sync::OnceCell;
 use serde::Deserialize;
 
+pub mod defs;
+
 #[derive(Debug, Deserialize)]
 pub struct Conf {
     pub server: Server,
@@ -13,6 +15,7 @@ pub struct Conf {
 pub struct Server {
     pub port: u32,
     pub log: String,
+    pub env: String,
 }
 
 #[derive(Debug, Deserialize)]
@@ -45,5 +48,9 @@ impl Conf {
 
     pub fn redis_addr(&self) -> String {
         format!("redis://{}:{}", self.redis.host, self.redis.port)
+    }
+
+    pub fn get_env(&self) -> String {
+        self.server.env.clone()
     }
 }

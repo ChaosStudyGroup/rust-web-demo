@@ -34,7 +34,7 @@ pub mod mysql {
             return None;
         }
 
-        pool.unwrap().acquire().await.ok()
+        pool.unwrap().try_acquire()
     }
 
     #[allow(dead_code)]
@@ -52,7 +52,7 @@ pub mod mysql {
 pub mod redis {
     use std::time::Duration;
 
-    use mobc_redis::{redis, RedisConnectionManager};
+    use mobc_redis::{redis, Connection, RedisConnectionManager};
     use once_cell::sync::OnceCell;
 
     static REDIS_POOL: OnceCell<mobc::Pool<RedisConnectionManager>> = OnceCell::new();
@@ -87,5 +87,48 @@ pub mod redis {
         }
 
         pool.unwrap().get_timeout(Duration::from_secs(5)).await.ok()
+    }
+
+    pub async fn cache_set<T: std::fmt::Display>(key: &str, val: T) -> bool {
+        let mut conn = match get_connection().await {
+            Some(c) => c,
+            None => return false,
+        };
+
+        let res: String = match redis::cmd("SET").arg(key).arg(format!("{}", val))
+            .query_async(&mut conn as &mut Connection).await {
+            Ok(s) => s,
+            Err(_) => "".to_string(),
+        };
+
+        res == "OK".to_string()
+    }
+
+    pub async fn cache_get(key: &str) -> String {
+        let mut conn = match get_connection().await {
+            Some(c) => c,
+            None => return "".to_string(),
+        };
+
+        match redis::cmd("GET").arg(key)
+            .query_async(&mut conn as &mut Connection).await {
+            Ok(t)  => t,
+            Err(_) => "".to_string(),
+        }
+    }
+
+    pub async fn cache_del(key: &str) -> bool {
+        let mut conn = match get_connection().await {
+            Some(c) => c,
+            None => return false,
+        };
+
+        let res: i32 = match redis::cmd("DEL").arg(key)
+            .query_async(&mut conn as &mut Connection).await {
+            Ok(n)  => n,
+            Err(_) => return false,
+        };
+
+        res >= 0
     }
 }

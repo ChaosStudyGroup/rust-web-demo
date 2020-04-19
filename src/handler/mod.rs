@@ -22,7 +22,7 @@ pub fn static_routes() -> impl HttpServiceFactory {
 }
 
 
-// 自定义请求日志中间件
+// custom request log middleware
 pub struct AccessLog;
 
 impl<S, B> Transform<S> for AccessLog
@@ -65,18 +65,20 @@ impl<S, B> Service for AccessLogMiddleware<S>
     fn call(&mut self, req: ServiceRequest) -> Self::Future {
         let begin = std::time::SystemTime::now();
 
-        // 记录相关的请求参数
+        // request information
         let path = req.path().to_string();
         let method = req.method().as_str().to_string();
         let ip_addr = req.connection_info().remote().unwrap().to_string();
         let queries = req.query_string().to_string();
 
-        // Todo: 需要获取request的body
+        // Todo: Request body is necessary.
 
         let fut = self.service.call(req);
 
         Box::pin(async move {
             let res = fut.await?;
+
+            // Todo: Response body is necessary.
 
             let duration = begin.elapsed().unwrap().as_millis();
 
