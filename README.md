@@ -1,7 +1,9 @@
 # 使用rust写的一个web版的demo
 
 > 旨在熟练rust的用法，对于web开发出身的来说，可以互相借鉴学习
+
 > 欢迎在issue中提交问题
+
 > 欢迎在分支上提交你的优秀的code
 
 + 使用actix-web作为基础的web框架
