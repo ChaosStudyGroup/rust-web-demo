@@ -12,7 +12,6 @@
 + log使用的是log4rs
 
 ### 问题
-+ actix-web的中间件，无法获取request的body以及response的body
 + actix-web的请求体，无法支持请求上下文kv存储，如request-id等
 + log4rs日志，目前不支持异步，而且不支持kv结构存储，json后不雅观
 + sqlx暂不支持orm，需要自己手动拼写sql
