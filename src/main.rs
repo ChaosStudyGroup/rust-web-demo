@@ -1,6 +1,9 @@
 #[macro_use]
 extern crate validator_derive;
 
+#[macro_use]
+mod utility;
+
 use std::error::Error;
 use actix_web::{App, HttpServer};
 
@@ -8,7 +11,6 @@ mod conf;
 mod dao;
 mod model;
 mod handler;
-mod utility;
 
 use crate::utility::{db, log};
 
@@ -27,7 +29,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
     let app_factory = || {
         App::new()
             // 自定义预处理中间件
-            .wrap(handler::AccessLog)
+            .wrap(handler::middleware::AccessLog)
             // api相关的路由
             .service(handler::api_routes())
             // 静态资源相关的路由

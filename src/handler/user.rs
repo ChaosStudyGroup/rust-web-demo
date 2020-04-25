@@ -1,12 +1,12 @@
 use serde::Deserialize;
 use validator::Validate;
-use actix_web::{Responder, web};
+use actix_web::{Responder, web, HttpRequest};
+
+use crate::conf;
+use crate::utility::db;
 use crate::utility::result::*;
 use crate::model::UserModel;
-use crate::utility::db;
-use crate::conf;
 use crate::dao::user as userDao;
-use std::ops::Deref;
 
 #[derive(Debug, Validate, Deserialize)]
 pub struct LoginInput {
@@ -16,7 +16,8 @@ pub struct LoginInput {
     pub password: Option<String>,
 }
 
-pub async fn login(input: web::Json<LoginInput>) -> impl Responder {
+pub async fn login(_req: HttpRequest, input: web::Json<LoginInput>) -> impl Responder {
+    // validate json input
     if let Err(e) = input.validate() {
         return system("inputs invalid", Some(&e)).data(e).json();
     }
@@ -28,7 +29,7 @@ pub async fn login(input: web::Json<LoginInput>) -> impl Responder {
             Some(u) => u,
             None => return user_not_found("not found user", None).json(),
         },
-        Err(e) => return system("find user exception", Some(e.deref())).json(),
+        Err(e) => return system("find user exception", Some(&*e)).json(),
     };
 
     // perform some test below with redis
