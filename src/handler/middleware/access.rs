@@ -11,9 +11,9 @@ use actix_web::dev::{ServiceRequest, ServiceResponse};
 use actix_http::body::{ResponseBody, MessageBody};
 
 // custom request log middleware
-pub struct AccessLog;
+pub struct Log;
 
-impl<S, B> Transform<S> for AccessLog
+impl<S, B> Transform<S> for Log
     where
         S: Service<Request=ServiceRequest, Response=ServiceResponse<B>, Error=Error> + 'static,
         S::Future: 'static,
@@ -22,22 +22,22 @@ impl<S, B> Transform<S> for AccessLog
     type Request = ServiceRequest;
     type Response = ServiceResponse<B>;
     type Error = Error;
-    type Transform = AccessLogMiddleware<S>;
+    type Transform = LogMiddleware<S>;
     type InitError = ();
     type Future = Ready<Result<Self::Transform, Self::InitError>>;
 
     fn new_transform(&self, service: S) -> Self::Future {
-        ok(AccessLogMiddleware {
+        ok(LogMiddleware {
             service: Rc::new(RefCell::new(service))
         })
     }
 }
 
-pub struct AccessLogMiddleware<S> {
+pub struct LogMiddleware<S> {
     service: Rc<RefCell<S>>,
 }
 
-impl<S, B> Service for AccessLogMiddleware<S>
+impl<S, B> Service for LogMiddleware<S>
     where
         S: Service<Request=ServiceRequest, Response=ServiceResponse<B>, Error=Error> + 'static,
         S::Future: 'static,

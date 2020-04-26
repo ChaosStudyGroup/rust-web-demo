@@ -29,7 +29,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
     let app_factory = || {
         App::new()
             // 自定义预处理中间件
-            .wrap(handler::middleware::AccessLog)
+            .wrap(handler::middleware::Log)
             // 自定义权限中间件
             .wrap(handler::middleware::Auth)
             // api相关的路由

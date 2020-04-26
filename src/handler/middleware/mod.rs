@@ -1,5 +1,5 @@
-mod access_log;
+mod access;
 mod auth;
 
-pub use access_log::AccessLog;
+pub use access::Log;
 pub use auth::Auth;
