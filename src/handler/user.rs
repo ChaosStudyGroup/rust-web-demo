@@ -17,7 +17,7 @@ pub struct LoginInput {
     pub password: Option<String>,
 }
 
-pub async fn login(_req: HttpRequest, input: web::Json<LoginInput>) -> impl Responder {
+pub async fn login(req: HttpRequest, input: web::Json<LoginInput>) -> impl Responder {
     let mut ctx = req.extensions_mut().remove::<Context>().unwrap();
 
     // check user is login, give a user id
