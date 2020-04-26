@@ -30,6 +30,8 @@ async fn main() -> Result<(), Box<dyn Error>> {
         App::new()
             // 自定义预处理中间件
             .wrap(handler::middleware::AccessLog)
+            // 自定义权限中间件
+            .wrap(handler::middleware::Auth)
             // api相关的路由
             .service(handler::api_routes())
             // 静态资源相关的路由
