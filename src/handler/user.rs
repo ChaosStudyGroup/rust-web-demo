@@ -1,6 +1,6 @@
 use serde::Deserialize;
 use validator::Validate;
-use actix_web::{Responder, web, HttpRequest};
+use actix_web::{Responder, web};
 
 use crate::conf;
 use crate::utility::db;
@@ -17,9 +17,7 @@ pub struct LoginInput {
     pub password: Option<String>,
 }
 
-pub async fn login(req: HttpRequest, input: web::Json<LoginInput>) -> impl Responder {
-    let mut ctx = req.extensions_mut().remove::<Context>().unwrap();
-
+pub async fn login(mut ctx: Context, input: web::Json<LoginInput>) -> impl Responder {
     // check user is login, give a user id
     let user_id: i32 = ctx.get("user_id").map(|i| *i).unwrap_or(0_i32);
 
