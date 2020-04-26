@@ -7,6 +7,7 @@ use crate::utility::db;
 use crate::utility::result::*;
 use crate::model::UserModel;
 use crate::dao::user as userDao;
+use crate::utility::context::Context;
 
 #[derive(Debug, Validate, Deserialize)]
 pub struct LoginInput {
@@ -17,6 +18,16 @@ pub struct LoginInput {
 }
 
 pub async fn login(_req: HttpRequest, input: web::Json<LoginInput>) -> impl Responder {
+    let mut ctx = req.extensions_mut().remove::<Context>().unwrap();
+
+    // check user is login, give a user id
+    let user_id: i32 = ctx.get("user_id").map(|i| *i).unwrap_or(0_i32);
+
+    // if user id exists, then user is logined
+    if user_id > 0 {
+        println!("user is login, user id is: {}", user_id);
+    }
+    
     // validate json input
     if let Err(e) = input.validate() {
         return system("inputs invalid", Some(&e)).data(e).json();
