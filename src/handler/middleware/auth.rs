@@ -52,7 +52,7 @@ impl<S, B> Service for AuthMiddleware<S>
         self.service.poll_ready(cx)
     }
 
-    fn call(&mut self, mut req: ServiceRequest) -> Self::Future {
+    fn call(&mut self, req: ServiceRequest) -> Self::Future {
         let mut svc = self.service.clone();
 
         Box::pin(async move {
@@ -64,7 +64,7 @@ impl<S, B> Service for AuthMiddleware<S>
             // save context into the extensions of request
             req.extensions_mut().insert(ctx);
 
-            let mut resp = svc.call(req).await?;
+            let resp = svc.call(req).await?;
 
             Ok(resp)
         })
