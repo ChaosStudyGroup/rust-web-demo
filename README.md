@@ -1,17 +1,17 @@
-# 使用rust写的一个web版的demo
+# A web demo with rust language
 
-> 旨在熟练rust的用法，对于web开发出身的来说，可以互相借鉴学习
+> The purpose is to be familiar with the use of rust. For web developers, you can learn from it.
 
-> 欢迎在issue中提交问题
+> Welcome to submit an issue in the issue.
 
-> 欢迎在分支上提交你的优秀的code
+> Welcome to submit your excellent code on the branch.
 
-+ 使用actix-web作为基础的web框架
-+ mysql使用的是sqlx
-+ redis使用的是mobc_redis，一种redis的连接池封装
-+ log使用的是log4rs
++ The basic web framework is actix-web.
++ Use sqlx as mysql's third party library.
++ Use mobc_redis as the three-party library of redis, built-in connection pool.
++ Use log4rs as the log library.
 
-### 问题
-+ log4rs日志，目前不支持异步，而且不支持kv结构存储，json后不雅观
-+ sqlx暂不支持orm，需要自己手动拼写sql
-+ redis暂不支持集群Cluster
+### Problems
++ log4rs log, currently does not support asynchronous, and does not support kv structure storage, unsightly after json.
++ sqlx does not support orm for now, you need to spell sql manually.
++ Redis does not currently support clusters.
