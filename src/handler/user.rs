@@ -1,71 +1,44 @@
-use serde::Deserialize;
+use actix_web::{web, HttpResponse};
+use serde::{Serialize, Deserialize};
 use validator::Validate;
-use actix_web::{Responder, web};
 
 use crate::conf;
-use crate::utility::db;
-use crate::utility::result::*;
-use crate::model::UserModel;
-use crate::dao::user as userDao;
+use crate::service::rbac;
 use crate::utility::context::Context;
+use crate::utility::result::*;
 
 #[derive(Debug, Validate, Deserialize)]
-pub struct LoginInput {
-    #[validate(length(max = 10, message="username must be less than 10 chars."))]
-    pub username: Option<String>,
-    #[validate(length(min = 6, message="password must be more than 6 chars."))]
-    pub password: Option<String>,
+pub struct LoginRequest {
+    #[validate(length(max = 50, message = "username must be less than 50 chars."))]
+    username: Option<String>,
+    #[validate(length(min = 6, message = "password must be more than 6 chars."))]
+    password: Option<String>,
 }
 
-pub async fn login(mut ctx: Context, input: web::Json<LoginInput>) -> impl Responder {
-    // check user is login, give a user id
-    let user_id: i32 = ctx.get("user_id").map(|i| *i).unwrap_or(0_i32);
+#[derive(Debug, Serialize)]
+pub struct LoginResponse {
+    user_id: i32,
+    token: String,
+}
 
-    // if user id exists, then user is logined
-    if user_id > 0 {
-        println!("user is login, user id is: {}", user_id);
-    }
-    
-    // validate json input
+pub async fn login(input: web::Json<LoginRequest>) -> HttpResponse {
     if let Err(e) = input.validate() {
         return system("inputs invalid", Some(&e)).data(e).json();
     }
 
-    // perform some test below with mysql
-
-    let user = match userDao::find_by_username("wang").await {
-        Ok(u) => match u {
-            Some(u) => u,
-            None => return user_not_found("not found user", None).json(),
-        },
-        Err(e) => return system("find user exception", Some(&*e)).json(),
+    let user = match rbac::user_by_username(input.username.as_deref().unwrap()).await {
+        Ok(u) => u,
+        Err(e) => return e,
     };
 
-    // perform some test below with redis
-
-    // save to redis
-    let redis_key = format!("{}{}", conf::defs::redis::USER_INFO, user.id);
-
-    let b_suc = db::redis::cache_set(&redis_key, serde_json::json!(user).to_string()).await;
-    if b_suc == false {
-        return system("redis cache set user info failed", None).json();
+    if user.password_hash != input.password.as_deref().unwrap() {
+        return password_invalid("", None).json()
     }
 
-    // get from redis
-    let user_cache = db::redis::cache_get(&redis_key).await;
+    let token = match rbac::generate_auth_key(user.id).await {
+        Ok(k) => k,
+        Err(e) => return e,
+    };
 
-    if user_cache.is_empty() {
-        return system("redis cache get user info failed", None).json();
-    }
-
-    let user: UserModel = serde_json::from_str(&user_cache).unwrap();
-
-    // del from redis
-    let del_suc = db::redis::cache_del(&redis_key).await;
-
-    if del_suc == false {
-        return system("redis cache del user info failed", None).json();
-    }
-
-    Success::data(user).json()
+    Success::data(LoginResponse{user_id: user.id, token}).json()
 }

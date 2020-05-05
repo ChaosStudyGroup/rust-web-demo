@@ -1,3 +1,3 @@
-mod user;
+mod rbac;
 
-pub use user::UserModel;
+pub use rbac::UserModel;

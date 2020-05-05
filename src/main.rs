@@ -10,6 +10,7 @@ use actix_web::{App, HttpServer};
 mod conf;
 mod dao;
 mod model;
+mod service;
 mod handler;
 
 use crate::utility::{db, log};

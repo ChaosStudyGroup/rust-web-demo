@@ -56,12 +56,19 @@ impl<S, B> Service for AuthMiddleware<S>
         let mut svc = self.service.clone();
 
         Box::pin(async move {
-            // check user auth from request header token, return a value user_id like 10086
-            let user_id = 10086_i32;
-            // save user_id into a context
+            let user_id = match req.headers().get("user_id") {
+                Some(v) => v.to_str().unwrap_or_default().to_string().parse().unwrap_or_default(),
+                None => 0,
+            };
+
+            let auth_key = match req.headers().get("token") {
+                Some(v) => v.to_str().unwrap_or_default().to_string(),
+                None => "".to_string(),
+            };
+
             let mut ctx = crate::utility::context::Context::new();
             ctx.insert("user_id", user_id);
-            // save context into the extensions of request
+            ctx.insert("auth_key", auth_key);
             req.extensions_mut().insert(ctx);
 
             let resp = svc.call(req).await?;
